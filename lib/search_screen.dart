@@ -2,90 +2,94 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class SearchScreen extends StatefulWidget{
-  static const String routeName="searchscreen";
-  SearchScreen({super.key});
+class SearchScreen extends StatefulWidget {
+  static const String routeName = "searchscreen";
+  const SearchScreen({super.key});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  List _allResults=[];
-  List _resultList=[];
-  final TextEditingController _searchcontreller=TextEditingController();
+  late Future<QuerySnapshot> _future;
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
-    // getPersonStream();
-    _searchcontreller.addListener(_onSearhChanged);
     super.initState();
-  }
-  _onSearhChanged( ){
-// print(_searchcontreller.text);
-    searchResultList();
+    _searchController.addListener(_onSearchChanged);
+    _future = getPersonStream();
   }
 
-  searchResultList(){
-    var showResults=[];
-    if(_searchcontreller.text !=""){
-      for(var personsnapshot in _allResults){
-        var nationalityID=personsnapshot['nationalityID'];
-
-      }
-    }else{
-      showResults=List.from(_allResults);
-    }
-    setState(() {
-      _resultList=showResults;
-
-    });
-  }
-
-
-  getPersonStream()async{
-    var data =await FirebaseFirestore.instance.collection('Persons').orderBy('nationalityID').get();
-    setState(() {
-      _allResults=data.docs;
-    });
-    searchResultList();
-  }
   @override
   void dispose() {
-    _searchcontreller.removeListener(_onSearhChanged);
-    _searchcontreller.dispose();
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
   }
-  @override
-  void didChangeDependencies() {
-    getPersonStream();
-    super.didChangeDependencies();
+
+  _onSearchChanged() {
+    setState(() {});
   }
 
+  Future<QuerySnapshot> getPersonStream() async {
+    try {
+      return FirebaseFirestore.instance
+          .collection('Persons')
+          .orderBy('nationalityID')
+          .get();
+    } catch (error) {
+      throw Exception("$error");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title:CupertinoSearchTextField(
-          controller: _searchcontreller,
+        title: CupertinoSearchTextField(
+          controller: _searchController,
         ),
-
       ),
-      body: ListView.builder(itemBuilder: (context,index){
-        return Column(
-          children: [
-            Text(_resultList[index]['name'] ),
-            Text(_resultList[index]['age'].toString() ),
-            Text(_resultList[index]['nationalityID'].toString() )
+      body: FutureBuilder<QuerySnapshot>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else {
+            final List<DocumentSnapshot> allResults =
+            snapshot.data!.docs as List<DocumentSnapshot>;
 
-          ],
-        );
-      },
-        itemCount: _resultList.length,
+            final List<DocumentSnapshot> resultList = _searchController.text.isNotEmpty
+                ? allResults.where((personSnapshot) {
+              return personSnapshot['nationalityID']
+                  .toString()
+                  .contains(_searchController.text);
+            }).toList()
+                : allResults;
 
+            if (resultList.isEmpty) {
+              return const Center(child: Text("No results found"));
+            } else {
+              return ListView.builder(
+                itemCount: resultList.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      Text(resultList[index]['name'].toString()),
+                      Text(resultList[index]['age'].toString()),
+                      Text(resultList[index]['nationalityID'].toString()),
+                    ],
+                  );
+                },
+              );
+            }
+          }
+        },
       ),
     );
   }
