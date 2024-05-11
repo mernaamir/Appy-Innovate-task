@@ -3,6 +3,7 @@ import 'package:interview/edit_person.dart';
 import 'package:interview/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:interview/persons.dart';
+import 'package:interview/search_screen.dart';
 import 'firebase_options.dart';
 
 void main()async {
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
      routes: {
        home.routeName:(context)=>home(),
        AllPersonScreen.routeName:(context)=>AllPersonScreen(),
-       EditPersonScreen.routeName:(context)=>EditPersonScreen()
+       EditPersonScreen.routeName:(context)=>EditPersonScreen(),
+       SearchScreen.routeName:(context)=>SearchScreen(),
      },
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:interview/firebase_functions.dart';
 import 'package:interview/person_model.dart';
 import 'package:interview/persons.dart';
+import 'package:interview/search_screen.dart';
 
 class home extends StatefulWidget {
   static const String routeName = "home";
@@ -19,14 +20,7 @@ class _homeState extends State<home> {
 
   TextEditingController _nationalityid = TextEditingController();
 
-  // @override
-  // void initState() {
-  //   _name = TextEditingController();
-  //   _age = TextEditingController();
-  //   _nationalityid = TextEditingController();
-  //   ScrollController().dispose();
-  //   super.initState();
-  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +64,10 @@ class _homeState extends State<home> {
                 onPressed: () {
                   Navigator.pushNamed(context, AllPersonScreen.routeName);
                 },
-                child: const Text("get persons"))
+                child: const Text("get persons")),
+            ElevatedButton(onPressed: (){
+              Navigator.pushNamed(context, SearchScreen.routeName);
+            }, child: Text("Search For a Person")),
           ],
         ),
       ),

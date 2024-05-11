@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:interview/edit_person.dart';
 import 'package:interview/person_model.dart';
-import 'package:interview/search_delegate.dart';
 import 'firebase_functions.dart';
 
 class AllPersonScreen extends StatefulWidget {
